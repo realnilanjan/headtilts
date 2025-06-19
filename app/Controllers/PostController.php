@@ -283,14 +283,14 @@ class PostController
         }
     }
 
-    public function delete(string $slug)
+    public function delete(string $slug, string $redirecturl="/")
     {
         Helpers::authMiddleware(['admin']);
 
         $token = $_GET['token'] ?? '';
         if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
             $_SESSION['flash_message'] = "Invalid or missing token.";
-            Helpers::redirect('/');
+            Helpers::redirect($redirecturl);
             exit;
         }
 
@@ -310,7 +310,7 @@ class PostController
             $_SESSION['flash_message'] = "Error: " . $e->getMessage();
         }
 
-        Helpers::redirect('/');
+        Helpers::redirect($redirecturl);
         exit;
     }
 
