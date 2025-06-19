@@ -147,7 +147,7 @@ try {
         ],
         'delete' => function () use ($url, $postController) {
             if (isset($url[1])) {
-                $postController->delete($url[1]);
+                $postController->delete($url[1], $url[2]);
             } else {
                 http_response_code(404);
                 Helpers::showErrorPage(404, "Invalid post ID");
