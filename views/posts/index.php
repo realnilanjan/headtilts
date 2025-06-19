@@ -77,7 +77,7 @@ $seoHelper->setDefault('All Posts');
                                 </a>
 
                                 <a href="#"
-                                   onclick="event.preventDefault(); openDeleteModal('<?= htmlspecialchars($post['slug']) ?>')"
+                                   onclick="event.preventDefault(); openDeleteModal('<?= htmlspecialchars($post['slug']) ?>', 'post')"
                                    class="inline-flex items-center justify-center px-1.5 py-1 text-xs font-medium rounded shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none"
                                    title="Delete">
                                     <i class="fas fa-trash text-xs"></i>
@@ -160,9 +160,9 @@ $seoHelper->setDefault('All Posts');
 <script>
     let currentSlug = '';
 
-    function openDeleteModal(slug) {
+    function openDeleteModal(slug, redirectto) {
         currentSlug = slug;
-        document.getElementById('confirm-delete-link').href = '/delete/' + slug;
+        document.getElementById('confirm-delete-link').href = '/delete/' + slug + redirectto;
         document.getElementById('delete-modal').classList.remove('hidden');
     }
 
