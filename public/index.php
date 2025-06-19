@@ -14,11 +14,9 @@ try {
     require_once __DIR__ . '/../app/Controllers/SettingsController.php';
     require_once __DIR__ . '/../app/Controllers/AuthController.php';
 
-    // Parse URL
     $url = isset($_GET['url']) ? explode('/', trim($_GET['url'], '/')) : [];
     $method = $_SERVER['REQUEST_METHOD'];
 
-    // Initialize models & controllers
     $postModel = new App\Models\PostModel($pdo);
     $userModel = new App\Models\UserModel($pdo);
 
@@ -166,7 +164,6 @@ try {
         },
     ];
 
-    // Combine all admin routes
     $adminRoutes = array_merge($adminCoreRoutes, $postManagementRoutes);
 
     // --- API ROUTES ---
@@ -202,16 +199,13 @@ try {
         }
     }
 
-    // --- COMBINE ALL ROUTES ---
     $routes = array_merge($publicRoutes, $authRoutes, $adminRoutes);
 
-    // Get URL segments
     $urlSegments = isset($_GET['url']) ? explode('/', trim($_GET['url'] ?? '', '/')) : [];
 
     $routeHandler = null;
     $currentLevel = $routes;
 
-    // Special case: root URL ('/')
     if (empty($urlSegments)) {
         if (isset($routes['']) && is_callable($routes[''])) {
             $routes['']();
@@ -223,31 +217,24 @@ try {
         }
     }
 
-    // Traverse nested route structure  
     foreach ($urlSegments as $segment) {
         if (isset($currentLevel[$segment])) {
             if (is_array($currentLevel[$segment])) {
-                // Go deeper into nested route
                 $currentLevel = $currentLevel[$segment];
             } elseif (is_callable($currentLevel[$segment])) {
-                // Found a callable handler
                 $routeHandler = $currentLevel[$segment];
                 break;
             } else {
-                // Invalid route structure
                 break;
             }
         } else {
-            // No matching route found
             break;
         }
     }
 
-    // Execute matched handler or fallback
     if ($routeHandler !== null) {
         $routeHandler();
     } else {
-        // Try method-based handler (e.g., POST, GET)
         if (isset($currentLevel[$method]) && is_callable($currentLevel[$method])) {
             $currentLevel[$method]();
         } else {
