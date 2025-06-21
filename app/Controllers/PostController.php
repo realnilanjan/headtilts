@@ -5,16 +5,19 @@ namespace App\Controllers;
 use App\ViewModels\PostViewModel;
 use App\Helpers\Helpers;
 use App\Services\ImageUploader;
+use App\Helpers\MenuHelper;
 
 use PDOException;
 
 class PostController
 {
     private PostViewModel $viewModel;
+    private MenuHelper $menuHelper;
 
-    public function __construct(PostViewModel $viewModel)
+    public function __construct(PostViewModel $viewModel, MenuHelper $menuHelper)
     {
         $this->viewModel = $viewModel;
+        $this->menuHelper = $menuHelper;
     }
 
     public function home()
@@ -26,7 +29,7 @@ class PostController
             $categories = $this->viewModel->getAllCategories(true); //Toggles is_included to show
             $postViewModel = $this->viewModel;
             $allCategories = $categories;
-
+            $mainMenu = $this->menuHelper->get_active_menu('header');
             require_once __DIR__ . '/../../views/pages/home.php';
         }
     }
@@ -50,7 +53,7 @@ class PostController
         if (!$viewModel) {
             Helpers::showErrorPage(404, "Post Not Found");
         }
-
+        $mainMenu = $this->menuHelper->get_active_menu('header');
         require_once __DIR__ . '/../../views/post/single.php';
     }
 
@@ -124,7 +127,7 @@ class PostController
         $allCategories = $this->viewModel->getAllCategories(true);
         $categoryName = $currentCategory['name'] ?? ucfirst($slug);
         $categoryDescription = $currentCategory['description'] ?? null;
-
+        $mainMenu = $this->menuHelper->get_active_menu('header');
         require_once __DIR__ . '/../../views/pages/category.php';
     }
 
@@ -327,6 +330,7 @@ class PostController
         $tag = $this->viewModel->getTagBySlug($tagSlug);
         $allCategories = $this->viewModel->getAllCategories(true);
         $tagName = $tag ? htmlspecialchars($tag['name']) : 'Unknown Tag';
+        $mainMenu = $this->menuHelper->get_active_menu('header');
         require_once __DIR__ . '/../../views/pages/tag.php';
     }
 
@@ -339,6 +343,8 @@ class PostController
 
     public function getPosts()
     {
+        Helpers::authMiddleware(['admin', 'editor', 'subscriber']);
+        
         $posts = $this->viewModel->getAllPosts();
         header('Content-Type: application/json');
         echo json_encode(['data' => $posts]);

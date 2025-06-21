@@ -49,7 +49,9 @@
             </a>
             <nav class="text-lg">
                 <ul id="desktop-menu" class="hidden md:flex flex-wrap gap-6 items-center">
-                    <?php include __DIR__ . '/../partials/categories_menu.php'; ?>
+                    <?php
+                    include __DIR__ . '/../partials/dynamic_menu.php';
+                    ?>
                 </ul>
 
                 <button id="hamburger" class="md:hidden p-2 ml-auto focus:outline-none">
@@ -147,6 +149,22 @@
             mobileMenu.querySelectorAll('a').forEach(link => {
                 link.addEventListener('click', closeMenu);
             });
+        }
+
+        function handleTypeChange(type) {
+            const itemUrlInput = document.getElementById('item_url');
+            // Customize URL input based on selected type
+            switch (type) {
+                case "Category":
+                    itemUrlInput.placeholder = "/category/slug";
+                    break;
+                case "Post":
+                    itemUrlInput.placeholder = "/post/slug";
+                    break;
+                case "Page":
+                    itemUrlInput.placeholder = "/page-name";
+                    break;
+            }
         }
     });
 </script>

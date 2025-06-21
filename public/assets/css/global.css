@@ -261,3 +261,16 @@
 .instagram-thumb:hover {
     transform: scale(1.05);
 }
+
+.submenu {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+    visibility: hidden;
+    transition: all 0.2s ease-in-out;
+}
+
+.group:hover .submenu {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    visibility: visible;
+}
