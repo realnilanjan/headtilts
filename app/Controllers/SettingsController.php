@@ -14,10 +14,10 @@ class SettingsController {
         require_once __DIR__ . '/../../views/admin/settings/site-settings.php';
     }
 
-    public function manageMenus() {
-        Helpers::authMiddleware(['admin']);
-        require_once __DIR__ . '/../../views/admin/settings/menus.php';
-    }
+    // public function manageMenus() {
+    //     Helpers::authMiddleware(['admin']);
+    //     require_once __DIR__ . '/../../views/admin/settings/menus.php';
+    // }
 
     public function analytics() {
         Helpers::authMiddleware(['admin']);

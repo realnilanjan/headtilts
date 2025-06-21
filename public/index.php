@@ -8,20 +8,34 @@ try {
     require_once __DIR__ . '/../vendor/autoload.php';
     require_once __DIR__ . '/../config/database.php';
     require_once __DIR__ . '/../app/Models/PostModel.php';
+
+    require_once __DIR__ . '/../app/Models/MenuModel.php';
     require_once __DIR__ . '/../app/Models/UserModel.php';
     require_once __DIR__ . '/../app/ViewModels/PostViewModel.php';
+
+    require_once __DIR__ . '/../app/Helpers/MenuHelper.php';
+
+    require_once __DIR__ . '/../app/ViewModels/MenuViewModel.php';
     require_once __DIR__ . '/../app/Controllers/PostController.php';
     require_once __DIR__ . '/../app/Controllers/SettingsController.php';
+    require_once __DIR__ . '/../app/Controllers/MenuController.php';
     require_once __DIR__ . '/../app/Controllers/AuthController.php';
 
     $url = isset($_GET['url']) ? explode('/', trim($_GET['url'], '/')) : [];
     $method = $_SERVER['REQUEST_METHOD'];
 
+    $menuModel = new App\Models\MenuModel($pdo);
+    $menuHelper = new \App\Helpers\MenuHelper($pdo);
+    $menuViewModel =  new App\ViewModels\MenuViewModel($menuModel);
+    $menuController = new App\Controllers\MenuController($menuViewModel, $menuHelper);
+
     $postModel = new App\Models\PostModel($pdo);
     $userModel = new App\Models\UserModel($pdo);
 
     $postViewModel = new App\ViewModels\PostViewModel($postModel, $userModel);
-    $postController = new App\Controllers\PostController($postViewModel);
+    
+    $postController = new App\Controllers\PostController($postViewModel, $menuHelper);
+
 
     $settingsController = new App\Controllers\SettingsController();
     $authController = new App\Controllers\AuthController($userModel);
@@ -116,7 +130,7 @@ try {
             'setup' => [
                 'users' => fn() => $settingsController->manageUsers(),
                 'sitesettings' => fn() => $settingsController->siteSettings(),
-                'menus' => fn() => $settingsController->manageMenus(),
+                'menus' => fn() => $menuController->index(),
                 'analytics' => fn() => $settingsController->analytics(),
                 'subscribers' => fn() => $settingsController->manageSubscribers(),
             ],
