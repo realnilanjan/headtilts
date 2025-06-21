@@ -1,0 +1,10 @@
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home1/headtzxc/public_html/
+    - cp -R app $DEPLOYPATH
+    - cp -R config $DEPLOYPATH
+    - cp -R public $DEPLOYPATH
+    - cp -R resources $DEPLOYPATH
+    - cp -R vendor $DEPLOYPATH
+    - cp -R views $DEPLOYPATH
+    - cp -R .htaccess $DEPLOYPATH
