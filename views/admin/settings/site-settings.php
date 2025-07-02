@@ -5,7 +5,7 @@ use App\Helpers\SeoHelper;
 ob_start();
 $seoHelper = new SeoHelper();
 $seoHelper->setDefault(
-    'Admin Dashboard'
+    'Site Settings'
 );
 ?>
 

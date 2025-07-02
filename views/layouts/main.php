@@ -11,6 +11,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.tiny.cloud/1/wzcjpotjx7fjwo994p6soary01p4wt9ztp5o7hqs2jrxjq9o/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <script src="//unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Lato&display=swap" rel="stylesheet">
     <style>

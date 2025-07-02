@@ -3,23 +3,21 @@
 namespace App\Controllers;
 
 use App\ViewModels\MenuViewModel;
-use App\Helpers\MenuHelper;
 use App\Helpers\Helpers;
 
 class MenuController
-    {
+{
     private MenuViewModel $menuViewModel;
-    private MenuHelper $menuHelper;
 
-    public function __construct(MenuViewModel $menuViewModel, MenuHelper $menuHelper)
+    public function __construct(MenuViewModel $menuViewModel)
     {
         $this->menuViewModel = $menuViewModel;
-        $this->menuHelper = $menuHelper;
     }
 
     public function index()
     {
         Helpers::authMiddleware(['admin']);
+        $menuViewModel = $this->menuViewModel;
         $selectedMenuId = $_GET['menu_id'] ?? null;
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_menu_item'])) {
             $title = $_POST['item_title'] ?? '';

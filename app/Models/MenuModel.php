@@ -8,7 +8,7 @@ class MenuModel extends Database
 {
     public function getAllMenus()
     {
-        $stmt = $this->pdo->query("SELECT id, name FROM menus ORDER BY name ASC");
+        $stmt = $this->pdo->query("SELECT id, name, slug FROM menus ORDER BY name ASC");
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
@@ -56,6 +56,13 @@ class MenuModel extends Database
     {
         $stmt = $this->pdo->prepare("SELECT * FROM menus WHERE slug = ?");
         $stmt->execute([$slug]);
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    public function getMenuSlugByID($id)
+    {
+        $stmt = $this->pdo->prepare("SELECT slug FROM menus WHERE id = ?");
+        $stmt->execute([$id]);
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 }

@@ -16,13 +16,13 @@ class MenuViewModel
     public function getMenusForSelect()
     {
         $menus = $this->model->getAllMenus();
-        $options = [];
+        return $menus;
+    }
 
-        foreach ($menus as $menu) {
-            $options[$menu['id']] = $menu['name'];
-        }
-
-        return $options;
+    public function getMenuSlugByID($id)
+    {
+        $menuslug = $this->model->getMenuSlugByID($id);
+        return $menuslug;
     }
 
     public function getMenuTree($menu_id)
@@ -45,5 +45,20 @@ class MenuViewModel
     public function getModel(): MenuModel
     {
         return $this->model;
+    }
+
+    public function get_active_menu($menuSlug)
+    {
+        try {
+            $menu = $this->model->getMenuBySlug($menuSlug);
+            if ($menu) {
+                return $this->getMenuTree($menu['id']);
+            }
+        } catch (\Exception $e) {
+            error_log("Menu load failed: " . $e->getMessage());
+            return [];
+        }
+
+        return [];
     }
 }
