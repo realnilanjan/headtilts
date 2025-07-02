@@ -13,8 +13,6 @@ try {
     require_once __DIR__ . '/../app/Models/UserModel.php';
     require_once __DIR__ . '/../app/ViewModels/PostViewModel.php';
 
-    require_once __DIR__ . '/../app/Helpers/MenuHelper.php';
-
     require_once __DIR__ . '/../app/ViewModels/MenuViewModel.php';
     require_once __DIR__ . '/../app/Controllers/PostController.php';
     require_once __DIR__ . '/../app/Controllers/SettingsController.php';
@@ -25,16 +23,15 @@ try {
     $method = $_SERVER['REQUEST_METHOD'];
 
     $menuModel = new App\Models\MenuModel($pdo);
-    $menuHelper = new \App\Helpers\MenuHelper($pdo);
     $menuViewModel =  new App\ViewModels\MenuViewModel($menuModel);
-    $menuController = new App\Controllers\MenuController($menuViewModel, $menuHelper);
+    $menuController = new App\Controllers\MenuController($menuViewModel);
 
     $postModel = new App\Models\PostModel($pdo);
     $userModel = new App\Models\UserModel($pdo);
 
     $postViewModel = new App\ViewModels\PostViewModel($postModel, $userModel);
     
-    $postController = new App\Controllers\PostController($postViewModel, $menuHelper);
+    $postController = new App\Controllers\PostController($postViewModel, $menuViewModel);
 
 
     $settingsController = new App\Controllers\SettingsController();

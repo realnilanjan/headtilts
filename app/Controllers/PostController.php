@@ -5,31 +5,41 @@ namespace App\Controllers;
 use App\ViewModels\PostViewModel;
 use App\Helpers\Helpers;
 use App\Services\ImageUploader;
-use App\Helpers\MenuHelper;
-
+use App\ViewModels\MenuViewModel;
 use PDOException;
 
 class PostController
 {
     private PostViewModel $viewModel;
-    private MenuHelper $menuHelper;
+    private MenuViewModel $menuViewModel;
 
-    public function __construct(PostViewModel $viewModel, MenuHelper $menuHelper)
+    public function __construct(PostViewModel $viewModel, MenuViewModel $menuViewModel)
     {
         $this->viewModel = $viewModel;
-        $this->menuHelper = $menuHelper;
+        $this->menuViewModel = $menuViewModel;
     }
 
     public function home()
     {
-        $maintainence_mode = "off";
-        if ($maintainence_mode === "on") {
+        // // Just check auth status without restricting to admin yet
+        // if (!Helpers::auth()) {
+        //     Helpers::redirect('/login');
+        // }
+
+        // Now get the user role
+        $userRole = $_SESSION['user']['role'] ?? null;
+
+        $maintainence_mode = "on";
+
+        // Only apply maintenance mode if the user is NOT an admin
+        if ($maintainence_mode === "on" && $userRole !== 'admin') {
             require_once __DIR__ . '/../../views/pages/maintainence_mode.php';
         } else {
-            $categories = $this->viewModel->getAllCategories(true); //Toggles is_included to show
+            // Admin or maintenance mode is off — show normal content
+            $categories = $this->viewModel->getAllCategories(true);
             $postViewModel = $this->viewModel;
             $allCategories = $categories;
-            $mainMenu = $this->menuHelper->get_active_menu('header');
+            $mainMenu = $this->menuViewModel->get_active_menu('header');
             require_once __DIR__ . '/../../views/pages/home.php';
         }
     }
@@ -53,7 +63,7 @@ class PostController
         if (!$viewModel) {
             Helpers::showErrorPage(404, "Post Not Found");
         }
-        $mainMenu = $this->menuHelper->get_active_menu('header');
+        $mainMenu = $this->menuViewModel->get_active_menu('header'); //TODO:
         require_once __DIR__ . '/../../views/post/single.php';
     }
 
@@ -127,7 +137,7 @@ class PostController
         $allCategories = $this->viewModel->getAllCategories(true);
         $categoryName = $currentCategory['name'] ?? ucfirst($slug);
         $categoryDescription = $currentCategory['description'] ?? null;
-        $mainMenu = $this->menuHelper->get_active_menu('header');
+        $mainMenu = $this->menuViewModel->get_active_menu('header'); //TODO:
         require_once __DIR__ . '/../../views/pages/category.php';
     }
 
@@ -330,7 +340,7 @@ class PostController
         $tag = $this->viewModel->getTagBySlug($tagSlug);
         $allCategories = $this->viewModel->getAllCategories(true);
         $tagName = $tag ? htmlspecialchars($tag['name']) : 'Unknown Tag';
-        $mainMenu = $this->menuHelper->get_active_menu('header');
+        $mainMenu = $this->menuViewModel->get_active_menu('header'); //TODO:
         require_once __DIR__ . '/../../views/pages/tag.php';
     }
 
@@ -344,7 +354,7 @@ class PostController
     public function getPosts()
     {
         Helpers::authMiddleware(['admin', 'editor', 'subscriber']);
-        
+
         $posts = $this->viewModel->getAllPosts();
         header('Content-Type: application/json');
         echo json_encode(['data' => $posts]);
