@@ -25,9 +25,9 @@ class PostController
         // if (!Helpers::auth()) {
         //     Helpers::redirect('/login');
         // }
-
+        //Helpers::authMiddleware(["admin"]);
         // Now get the user role
-        $userRole = $_SESSION['user']['role'] ?? null;
+            $userRole = $_SESSION['user']['role'] ?? null;
 
         $maintainence_mode = "on";
 

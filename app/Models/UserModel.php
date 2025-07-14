@@ -21,6 +21,12 @@ class UserModel extends Database
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
+    public function setRefreshToken(int $userId, string $token, string $expiresAt): bool
+    {
+        $stmt = $this->pdo->prepare("UPDATE users SET remember_token = ?, remember_expires_at = ? WHERE id = ?");
+        return $stmt->execute([$token, $expiresAt, $userId]);
+    }
+
     public function getUserById($id): ?array
     {
         $stmt = $this->pdo->prepare("SELECT * FROM users WHERE id = ?");

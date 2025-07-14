@@ -6,6 +6,9 @@ use App\Models\UserModel;
 use App\Helpers\Helpers;
 use App\Helpers\FlashMessage;
 
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
 class AuthController
 {
     private UserModel $userModel;
@@ -29,6 +32,7 @@ class AuthController
         $user = $this->userModel->getUserByEmail($email);
 
         if ($user && password_verify($password, $user['password'])) {
+            // Create session as before
             $_SESSION['user'] = [
                 'id' => $user['id'],
                 'name' => $user['name'],
@@ -37,7 +41,30 @@ class AuthController
                 'role' => $user['role']
             ];
 
-            $this->rememberMe($user, $remember); // Set remember me cookie if checked
+            // Generate JWT token
+            $issuedAt = time();
+            $expiration = $issuedAt + intval($_ENV['JWT_EXPIRE']);
+            $payload = [
+                'iss' => $_ENV['APP_URL'] ?? 'localhost',
+                'iat' => $issuedAt,
+                'exp' => $expiration,
+                'data' => [
+                    'id' => $user['id'],
+                    'name' => $user['name'],
+                    'username' => $user['username'],
+                    'email' => $user['email'],
+                    'role' => $user['role']
+                ]
+            ];
+
+            $token = JWT::encode($payload, $_ENV['JWT_SECRET'], 'HS256');
+
+            // Optionally store token in session or send it via response
+            $_SESSION['jwt_token'] = $token;
+
+            // Set remember me cookie if checked
+            $this->rememberMe($user, $remember);
+            // Redirect or return JSON depending on use case
             Helpers::redirect('/');
             exit;
         } else {
@@ -77,13 +104,33 @@ class AuthController
         exit;
     }
 
+    private function generateToken(int $length = 64): string
+    {
+        return bin2hex(random_bytes($length));
+    }
+
     public function rememberMe($user, $remember = false)
     {
         if ($remember) {
-            $token = bin2hex(random_bytes(50));
-            $expiry = time() + 60 * 60 * 24 * 7; // 1 week
-            $this->userModel->setRememberToken($user['id'], $token, date('Y-m-d H:i:s', strtotime('+7 days')));
-            setcookie('remember_me', $token, $expiry, '/', '', false, true);
+            $refreshToken = $this->generateToken();
+            $expiresAt = date('Y-m-d H:i:s', strtotime('+30 days'));
+
+            // Store refresh token in DB
+            $this->userModel->setRefreshToken($user['id'], $refreshToken, $expiresAt);
+
+            // Set secure cookie with just the refresh token
+            setcookie(
+                'remember_me',
+                $refreshToken,
+                [
+                    'expires' => strtotime($expiresAt),
+                    'path' => '/',
+                    'domain' => '',
+                    'secure' => false, // Set true in production
+                    'httponly' => true,
+                    'samesite' => 'Lax'
+                ]
+            );
         }
     }
 

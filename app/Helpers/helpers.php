@@ -2,6 +2,9 @@
 
 namespace App\Helpers;
 
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
 class Helpers
 {
     /**
@@ -60,19 +63,89 @@ class Helpers
     {
         self::init();
 
-        if (!self::auth()) {
-            self::redirect('/login');
+        $jwtToken = null;
+
+        // Try getting JWT from Authorization header
+        if (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+            if (preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+                $jwtToken = $matches[1];
+            }
         }
 
-        // If specific roles are required, check if the user has at least one of them
+        // Or try getting from session
+        if (!$jwtToken && isset($_SESSION['jwt_token'])) {
+            $jwtToken = $_SESSION['jwt_token'];
+        }
+
+        if ($jwtToken) {
+            try {
+                $decoded = JWT::decode($jwtToken, new Key($_ENV['JWT_SECRET'], 'HS256'));
+
+                // Use data directly from JWT without querying DB
+                $userData = (array)$decoded->data;
+
+                // Populate minimal session for compatibility
+                if (!isset($_SESSION['user'])) {
+                    $_SESSION['user'] = [
+                        'id' => $userData['id'],
+                        'email' => $userData['email'],
+                        'role' => $userData['role']
+                    ];
+                }
+            } catch (\Exception $e) {
+                // Invalid token — try remember_me fallback
+                if (!self::handleRememberMeFallback()) {
+                    self::redirect('/login');
+                }
+            }
+        } else {
+            // No JWT — fallback to session or remember_me
+            if (!self::handleRememberMeFallback()) {
+                self::redirect('/login');
+            }
+        }
+
+        // Role-based access check
         if ($requiredRoles) {
             $userRole = $_SESSION['user']['role'];
-
             if (!in_array($userRole, $requiredRoles, true)) {
                 header("HTTP/1.1 403 Forbidden");
                 exit("Access Denied");
             }
         }
+    }
+
+    private static function handleRememberMeFallback(): bool
+    {
+        if (!isset($_COOKIE['remember_me'])) {
+            return false;
+        }
+
+        $token = $_COOKIE['remember_me'];
+
+        try {
+            $decoded = JWT::decode($token, new Key($_ENV['JWT_SECRET'], 'HS256'));
+
+            // Ensure required claims are present
+            if (isset($decoded->data)) {
+                $userData = (array)$decoded->data;
+
+                // Populate session with user data from JWT
+                $_SESSION['user'] = [
+                    'id' => $userData['id'],
+                    'email' => $userData['email'],
+                    'role' => $userData['role']
+                ];
+
+                return true;
+            }
+        } catch (\Exception $e) {
+            // Invalid or expired token
+            return false;
+        }
+
+        return false;
     }
 
     /**
